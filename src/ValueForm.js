@@ -21,16 +21,20 @@ class ValueForm extends React.Component{
 
   render(){
     return(
-      <form onSubmit={this.handleSubmit}>
-        <label>
-        <input
-          className="input-value"
-          type="text"
-          value={this.props.inputValue}
-          onChange={this.handleChange}/>
-        </label>
-        <input className='submit-btn' type="submit" value={this.props.submitIcon}/>
-      </form>
+    <form onSubmit={this.handleSubmit}>
+      <label htmlFor="name" className="block text-sm text-gray-700">
+        {this.props.submitIcon}
+      </label>
+      <input
+        type="text"
+        name={this.props.submitIcon}
+        id="price"
+        className="focus:ring-indigo-500 focus:border-indigo-500 w-15 pl-7 pr-12 sm:text-sm border-blue-500 rounded-md "
+        placeholder="0"
+        value={this.props.inputValue}
+        onChange={this.handleChange}
+      />
+    </form>
     )
   }
 }

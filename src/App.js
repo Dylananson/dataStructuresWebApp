@@ -7,19 +7,17 @@ import ListElements from './ListElements'
 class List extends React.Component {
   constructor(props) {
     super(props)
-    this.handleRemoveValueChange = this.handleRemoveValueChange.bind(this);
     this.handleAddValueChange = this.handleAddValueChange.bind(this);
-    this.handleRemoveSubmit = this.handleRemoveSubmit.bind(this);
     this.handleAddSubmit = this.handleAddSubmit.bind(this);
     this.handleFindValueChange = this.handleFindValueChange.bind(this);
     this.handleFindSubmit = this.handleFindSubmit.bind(this);
     this.handleBinSearchSubmit = this.handleBinSearchSubmit.bind(this);
     this.handleBinSearchValueChange = this.handleBinSearchValueChange.bind(this);
-    this.handleClick = this.handleClick.bind(this)
+    this.handleRemoveSubmit = this.handleRemoveSubmit.bind(this);
+    this.handleClick = this.handleClick.bind(this);
     this.state = {
       selectedIndex: 0,
       list: [1, 4, 8, 10, 26, 47, 48, 99, 100, 102, 124, 125, 130, 136, 156, 156, 236, 237],
-      removeValue: '',
       addValue: '',
       findValue: '',
       keyNumber: 0,
@@ -27,13 +25,13 @@ class List extends React.Component {
       pivot: null,
       left: null,
       right: null,
+      found: null,
     }
   }
 
   handleSort() {
     const newList = this.state.list.slice()
     newList.sort((a, b) => a - b);
-    console.log(newList)
     this.setState({
       list: newList
     })
@@ -42,11 +40,6 @@ class List extends React.Component {
   handleAddValueChange(value) {
     this.setState({
       addValue: value
-    })
-  }
-  handleRemoveValueChange(value) {
-    this.setState({
-      removeValue: value
     })
   }
 
@@ -76,16 +69,15 @@ class List extends React.Component {
 
   }
 
-  handleRemoveSubmit(value) {
+  handleRemoveSubmit() {
     let newList = this.state.list.slice()
-    value = parseInt(value)
-    if (newList.indexOf(value) === -1) {
+    if (! this.state.selectedIndex) {
       return
     }
-    newList.splice(newList.indexOf(value), 1)
+    newList.splice(this.state.selectedIndex, 1)
     this.setState({
       list: newList,
-      removeValue: ''
+      selectedIndex: null,
     })
   }
 
@@ -93,6 +85,9 @@ class List extends React.Component {
     let newList = this.state.list.slice()
     value = parseInt(value)
     let searchHistory = this.binarySearch(newList, value)
+    this.setState({
+      selectedIndex: null,
+    })
     this.visualizeBinarySearch(searchHistory)
   }
 
@@ -134,7 +129,8 @@ class List extends React.Component {
           this.setState({
             pivot: searchHistory[i]['pivot'],
             left: searchHistory[i]['left'],
-            right: searchHistory[i]['right']
+            right: searchHistory[i]['right'],
+            found: searchHistory[i]['found']
           })
         }
         .bind(this), i * 1000
@@ -145,7 +141,8 @@ class List extends React.Component {
         this.setState({
             pivot: null,
             left: null,
-            right: null
+            right: null,
+            found: null,
         })
       }.bind(this), searchHistory.length * 1000
     )
@@ -162,7 +159,7 @@ class List extends React.Component {
         "left": left,
         "right": right,
         "pivot": pivot,
-        "found": false
+        "found": null
       })
       if (list[pivot] === target) {
         history.push({
@@ -179,19 +176,22 @@ class List extends React.Component {
         right = pivot - 1
       }
     }
+    history.push({
+        "left": left,
+        "right": right,
+        "pivot": pivot,
+        "found": false
+      })
     return history
-  }
+    }
 
   handleClick(index){
     this.setState({
       selectedIndex: index
     })
-    console.log(index)
-    console.log(this.state.selectedIndex)
   }
 
   render() {
-    const removeValue = this.state.removeValue;
     const addValue = this.state.addValue;
     const findValue = this.state.findValue;
     const binSearchValue = this.state.binSearchValue;
@@ -205,6 +205,7 @@ class List extends React.Component {
             pivot={this.state.pivot}
             left={this.state.left}
             right={this.state.right}
+            found={this.state.found}
           />
           <ValueForm
             inputValue={addValue}
@@ -213,26 +214,20 @@ class List extends React.Component {
             submitIcon='Add'
           />
           <ValueForm
-            inputValue={removeValue}
-            handleInputChange={this.handleRemoveValueChange}
-            handleSubmitInput={this.handleRemoveSubmit}
-            submitIcon='Remove'
-          />
-          <ValueForm
-            inputValue={findValue}
-            handleInputChange={this.handleFindValueChange}
-            handleSubmitInput={this.handleFindSubmit}
-            submitIcon='Select Index'
-            className='input-value'
-          />
-          <ValueForm
             inputValue={binSearchValue}
             handleInputChange={this.handleBinSearchValueChange}
             handleSubmitInput={this.handleBinSearchSubmit}
             submitIcon='Find value with binary search'
             className='input-value'
           />
-          <button className='button' value='Sort' onClick={() => this.handleSort()}> Sort</button>
+          <button
+            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded w-24"
+            value='Remove'
+            onClick={() => this.handleRemoveSubmit()}> Remove</button>
+          <button
+            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded w-24"
+            value='Sort'
+            onClick={() => this.handleSort()}> Sort</button>
         </div>
       </div>
     );
