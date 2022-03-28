@@ -3,6 +3,8 @@ import './App.css';
 import React from 'react';
 import ValueForm from './ValueForm'
 import ListElements from './ListElements'
+import { binarySearch } from './ListUtils';
+import Button from './Button'
 
 class List extends React.Component {
   constructor(props) {
@@ -26,6 +28,7 @@ class List extends React.Component {
       left: null,
       right: null,
       found: null,
+      subLists: [],
     }
   }
 
@@ -84,9 +87,13 @@ class List extends React.Component {
   handleBinSearchSubmit(value) {
     let newList = this.state.list.slice()
     value = parseInt(value)
-    let searchHistory = this.binarySearch(newList, value)
+    let searchHistory = binarySearch(newList, value)
     this.setState({
-      selectedIndex: null,
+        pivot: null,
+        left: null,
+        right: null,
+        found: null,
+        subLists: []
     })
     this.visualizeBinarySearch(searchHistory)
   }
@@ -123,71 +130,44 @@ class List extends React.Component {
   }
 
   visualizeBinarySearch(searchHistory) {
+    // const newSubList = this.state.subLists.slice()
     for (let i = 0; i < searchHistory.length; i++) {
+      let left = searchHistory[i]['left']
+      let right = searchHistory[i]['right']
+      
+      // newSubList.push(this.state.list.slice(left,right+1))
+      // console.log(newSubList, this.state.left, this.state.right)
+      // this.setState({
+      //   pivot: searchHistory[i]['pivot'],
+      //   selectedIndex: searchHistory[i]['pivot'],
+      //   left: left,
+      //   right: right,
+      //   found: searchHistory[i]['found'],
+      //   subLists: newSubList
+      // })
       setTimeout(
         function () {
+          const newSubList = this.state.subLists.slice()
+          newSubList.push(this.state.list.slice(left,right+1))
+          console.log(newSubList, this.state.left, this.state.right)
           this.setState({
             pivot: searchHistory[i]['pivot'],
-            left: searchHistory[i]['left'],
-            right: searchHistory[i]['right'],
-            found: searchHistory[i]['found']
+            selectedIndex: searchHistory[i]['pivot'],
+            left: left,
+            right: right,
+            found: searchHistory[i]['found'],
+            subLists: newSubList
           })
         }
         .bind(this), i * 1000
       )
     }
-    setTimeout(
-      function(){
-        this.setState({
-            pivot: null,
-            left: null,
-            right: null,
-            found: null,
-        })
-      }.bind(this), searchHistory.length * 1000
-    )
   }
 
-  binarySearch(list, target) {
-    let history = []
-    let left = 0;
-    let right = list.length - 1;
-    let pivot;
-    while (left <= right) {
-      pivot = parseInt(left + ((right - left) / 2))
-      history.push({
-        "left": left,
-        "right": right,
-        "pivot": pivot,
-        "found": null
-      })
-      if (list[pivot] === target) {
-        history.push({
-          "left": left,
-          "right": right,
-          "pivot": pivot,
-          "found": true
-        })
-        return history
-      }
-      else if (list[pivot] < target) {
-        left = pivot + 1
-      } else {
-        right = pivot - 1
-      }
-    }
-    history.push({
-        "left": left,
-        "right": right,
-        "pivot": pivot,
-        "found": false
-      })
-    return history
-    }
 
   handleClick(index){
     this.setState({
-      selectedIndex: index
+      selectedIndex: index === this.state.selectedIndex ? null : index
     })
   }
 
@@ -195,9 +175,24 @@ class List extends React.Component {
     const addValue = this.state.addValue;
     const findValue = this.state.findValue;
     const binSearchValue = this.state.binSearchValue;
+    const subLists = this.state.subLists.map((value,index) =>{
+      return <div className={`translate-y-10 justify-center md: transition-all delay-300 content-center flex space-y-10 py-10`}>
+        <ListElements
+            list={value}
+            handleClick={this.handleClick}
+            pivot={parseInt(value.length/2)}
+            selectedIndex={parseInt(value.length/2)}
+            left={null}
+            right={null}
+            found={this.state.found}
+          />
+      </div>
+    })
+    console.log(subLists)
     return (
       <div className='game'>
-        <div className='container-row'>
+
+        <div className='justify-center'>
           <ListElements
             list={this.state.list}
             handleClick={this.handleClick}
@@ -207,6 +202,7 @@ class List extends React.Component {
             right={this.state.right}
             found={this.state.found}
           />
+          {subLists}
           <ValueForm
             inputValue={addValue}
             handleInputChange={this.handleAddValueChange}
@@ -220,14 +216,8 @@ class List extends React.Component {
             submitIcon='Find value with binary search'
             className='input-value'
           />
-          <button
-            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded w-24"
-            value='Remove'
-            onClick={() => this.handleRemoveSubmit()}> Remove</button>
-          <button
-            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded w-24"
-            value='Sort'
-            onClick={() => this.handleSort()}> Sort</button>
+          <Button text="Remove" onClick={()=>this.handleRemoveSubmit()}/>
+          <Button text="Sort" onClick={() =>this.handleSort()}/>
         </div>
       </div>
     );

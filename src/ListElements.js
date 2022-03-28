@@ -9,6 +9,7 @@ class ListElements extends React.Component {
 
   renderSquare(item, i) {
     let background = 'bg-transparent'
+    console.log(this.props.list, 'pivot', this.props.pivot, this.props.selectedIndex)
     if ((this.props.pivot && this.props.pivot === i || this.props.selectedIndex === i) ) {
       // class name should be pivot
       if((this.props.found)){
