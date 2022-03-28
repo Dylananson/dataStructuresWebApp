@@ -1,3 +1,4 @@
+import { type } from "@testing-library/user-event/dist/type";
 import React from "react";
 import Square from './Square'
 
@@ -7,22 +8,31 @@ class ListElements extends React.Component {
   }
 
   renderSquare(item, i) {
-    let className = 'square'
-    if ((this.props.pivot && this.props.pivot === i) || this.props.selectedIndex === i) {
+    let background = 'bg-transparent'
+    if ((this.props.pivot && this.props.pivot === i || this.props.selectedIndex === i) ) {
       // class name should be pivot
-      className = 'square-highlight square'
+      if((this.props.found)){
+        background = 'bg-green-500'
+      } else{
+        if(this.props.found === null){
+          background = 'bg-blue-500'
+        }
+        else{
+          background = 'bg-red-500'
+        }
+      }
     } else if (this.props.left && i < this.props.left) {
       // set to be grey?
-      className = 'square-grey square'
+      background = 'bg-gray-500'
     } else if (this.props.right && i > this.props.right) {
       // set to be grey
-      className = 'square-grey square'
+      background = 'bg-gray-500'
     } 
     return (
-      <Square
+      <Square 
         key={i}
         value={this.props.list[i]}
-        className={className}
+        className= {`transition-all ease-in-out duration-500 ${background} hover:bg-blue-500 text-blue-700 font-semibold hover:text-white py-2 px-4 border border-blue-500 hover:border-transparent rounded`}
         onClick={() => this.handleClick(i)}
       />
     );
@@ -40,17 +50,10 @@ class ListElements extends React.Component {
 
   render() {
     const squares = this.renderRow(this.props.list)
-    console.log(squares)
     return (
       <div>
         {squares}
       </div>
-      // {/* <div>
-      // {squares.map((item, index) =>{
-      // return item
-      // }
-      // )} 
-      // </div> */}
     );
   }
 }
